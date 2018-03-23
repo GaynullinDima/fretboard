@@ -1,6 +1,7 @@
 package org.mozilla.fretboard
 
 
+import org.mozilla.fretboard.utils.readStream
 import java.io.BufferedInputStream
 import java.net.HttpURLConnection
 import java.net.URL

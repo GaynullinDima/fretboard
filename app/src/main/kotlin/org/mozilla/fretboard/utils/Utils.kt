@@ -11,3 +11,4 @@ fun readStream(inputStream: BufferedInputStream): String {
     bufferedReader.forEachLine { stringBuilder.append(it) }
     return stringBuilder.toString()
 }
+
