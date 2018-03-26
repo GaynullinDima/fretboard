@@ -1,4 +1,4 @@
-package org.mozilla.fretboard
+package org.mozilla.fretboard.utils
 
 import java.io.BufferedInputStream
 import java.io.BufferedReader

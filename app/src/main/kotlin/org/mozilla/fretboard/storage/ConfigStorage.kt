@@ -1,8 +1,7 @@
-package org.mozilla.fretboard
+package org.mozilla.fretboard.storage
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.R.id.edit
 
 
 // TODO Decide with API

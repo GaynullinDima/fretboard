@@ -1,20 +1,18 @@
-package org.mozilla.fretboard
+package org.mozilla.fretboard.sheduler
 
 import android.app.job.JobInfo
-import android.content.Context.JOB_SCHEDULER_SERVICE
-import android.app.job.JobInfo.BACKOFF_POLICY_EXPONENTIAL
-import android.app.job.JobInfo.NETWORK_TYPE_ANY
 import android.app.job.JobScheduler
 import android.content.ComponentName
 import android.content.Context
+import org.mozilla.fretboard.config.FretboardConfiguration
 
 
 interface  FretboardScheduler {
-    fun scheduleUpload(configuration : FretboardConfiguration )
+    fun scheduleUpload(configuration : FretboardConfiguration)
 }
 
-class JobSchedulerFretboardScheduler : FretboardScheduler{
-    val JOB_ID = 42 //  TODO: Make this configurable (Issue #24)
+class JobSchedulerFretboardScheduler : FretboardScheduler {
+    val JOB_ID = 42 //  TODO: Make this configurable by client
 
     override fun scheduleUpload(configuration: FretboardConfiguration) {
         val jobService = ComponentName(configuration.getContext(), FretboardJobService::class.java)
@@ -25,9 +23,11 @@ class JobSchedulerFretboardScheduler : FretboardScheduler{
                 .setBackoffCriteria(configuration.getInitialBackoffForUpload(), JobInfo.BACKOFF_POLICY_EXPONENTIAL)
                 .build()
 
-        val scheduler = configuration.getContext()
-                .getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
-
-        scheduler.schedule(jobInfo)
+        val context = configuration.getContext()
+        if (context != null) {
+            val scheduler = context
+                    .getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
+            scheduler.schedule(jobInfo)
+        } // TODO: refactor this code
     }
 }
