@@ -11,7 +11,7 @@ class FretboardConfiguration {
     private val DEFAULT_USER_NAME = "token"
     private val DEFAULT_SERVER_ENDPOINT = "https://kinto.dev.mozaws.net"
 
-    private val context: Context? = null
+    private var context: Context? = null
     private val initialBackoffForUpload: Long = DEFAULT_INITAL_BACKOFF_FOR_UPLOAD
     private val userAgent: String? = DEFAULT_USER_AGENT
     private val name: String = DEFAULT_USER_NAME
@@ -36,6 +36,10 @@ class FretboardConfiguration {
 
     fun getContext(): Context? {
         return context
+    }
+
+    fun setContext(context: Context) {
+        this.context = context
     }
 
     fun getInitialBackoffForUpload(): Long {

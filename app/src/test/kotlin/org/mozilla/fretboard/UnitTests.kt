@@ -1,11 +1,15 @@
 package org.mozilla.fretboard
 
+import android.app.job.JobParameters
+import android.app.job.JobService
+import android.os.AsyncTask
 import junit.framework.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mozilla.fretboard.config.FretboardConfiguration
 import org.mozilla.fretboard.net.ConfigLoader
 import org.mozilla.fretboard.net.HttpURLConnectionConfigLoader
+import org.mozilla.fretboard.sheduler.FretboardJobService
 import org.mozilla.fretboard.storage.ConfigStorage
 import org.mozilla.fretboard.storage.SharedPreferenceConfigStorage
 import org.robolectric.RobolectricTestRunner
@@ -13,6 +17,11 @@ import org.robolectric.RuntimeEnvironment
 
 
 import java.net.URL
+import org.mockito.ArgumentMatchers.anyBoolean
+import org.mockito.Mockito.*
+import org.robolectric.Robolectric
+
+
 
 
 /**
@@ -24,8 +33,8 @@ import java.net.URL
 
 // TODO rewrite tests
 @RunWith(RobolectricTestRunner::class)
-class ConfigLoaderUnitTest {
-    private val TAG = "ConfigLoaderUnitTest"
+class FretboardConfigLoaderTest {
+    private val TAG = "FretboardConfigLoaderTest"
 
 
     @Test
@@ -39,41 +48,68 @@ class ConfigLoaderUnitTest {
 }
 
 @RunWith(RobolectricTestRunner::class)
-class ConfigStorageUnitTest {
-    private val TAG = "ConfigStorageUnitTest"
+class FretboardConfigStorageTest {
+    private val TAG = "FretboardConfigStorageTest"
 
 
     @Test
     fun testOverMultipleSession() {
         val context = RuntimeEnvironment.application
+        val config = FretboardConfiguration()
+        config.setContext(context)
         val storage: ConfigStorage = SharedPreferenceConfigStorage()
 
         for (i in 1..10) {
-            storage.setConfigJson(context, "Test : $i")
+            storage.setExperimentJson(config, "Test : $i")
         }
 
-        println(storage.getConfigJson(context))
-        assertEquals(storage.getConfigJson(context), "Test : 10")
+        println(storage.getExperimentJson(config))
+        assertEquals(storage.getExperimentJson(config), "Test : 10")
 
     }
 
     @Test
     fun testResettingExperimentManually() {
         val context = RuntimeEnvironment.application
+        val config = FretboardConfiguration()
+        config.setContext(context)
         val storage: ConfigStorage = SharedPreferenceConfigStorage()
 
-        storage.clearOverrideValue(context, "Test")
-        storage.setOverrideValue(context, "Test", true)
+        storage.clearOverrideValue(config, "Test")
+        storage.setOverrideValue(config, "Test", true)
 
         // ugly hack
-        assertEquals(storage.getOverrideValue(context, "Test"), true)
-        println(storage.getOverrideValue(context, "Test"))
-        storage.setOverrideValue(context, "Test", false)
-        assertEquals(storage.getOverrideValue(context, "Test"), false)
-        println(storage.getOverrideValue(context, "Test"))
+        assertEquals(storage.getOverrideValue(config, "Test"), true)
+        println(storage.getOverrideValue(config, "Test"))
+        storage.setOverrideValue(config, "Test", false)
+        assertEquals(storage.getOverrideValue(config, "Test"), false)
+        println(storage.getOverrideValue(config, "Test"))
 
     }
 }
+
+@RunWith(RobolectricTestRunner::class)
+class FretboardJobServiceTest {
+    private val TAG = "FretboardConfigLoaderTest"
+
+    @Test
+    fun testServiceisWorking() {
+        val parameters = mock(JobParameters::class.java)
+        val task = mock(AsyncTask::class.java)
+        val path =  "/v1/buckets/default/collections/tasks/records"
+        val context = RuntimeEnvironment.application
+        val service = FretboardJobService(context)
+        /*val service = spy(Robolectric.buildService(FretboardJobService::class.java!!)
+                .create()
+                .get())
+
+        doNothing().`when`(service).jobFinished(any(JobParameters::class.java), anyBoolean())
+        */ //TODO refactor
+        service.loadExperimentsInBackground(path, task, parameters)
+    }
+
+}
+
 
 
 

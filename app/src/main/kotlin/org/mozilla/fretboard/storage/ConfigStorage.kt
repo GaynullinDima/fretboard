@@ -2,70 +2,94 @@ package org.mozilla.fretboard.storage
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
+import org.mozilla.fretboard.config.FretboardConfiguration
 
 
 // TODO Decide with API
 interface ConfigStorage {
-    fun getConfigJson(context: Context): String?
-    fun setConfigJson(context: Context, configJson: String)
-    fun getOverrideValue(context: Context, experimentName: String): Boolean?
-    fun setOverrideValue(context : Context, experimentName: String, isEnabled: Boolean)
-    fun clearOverrideValue(context: Context, experimentName: String)
+    fun getExperimentJson(config: FretboardConfiguration): String?
+    fun setExperimentJson(config: FretboardConfiguration, experimentJson: String)
+    fun getOverrideValue(config: FretboardConfiguration, experimentName: String): Boolean?
+    fun setOverrideValue(config: FretboardConfiguration, experimentName: String, isEnabled: Boolean)
+    fun clearOverrideValue(config: FretboardConfiguration, experimentName: String)
 }
 
 class SharedPreferenceConfigStorage : ConfigStorage {
+
+    //TODO add config to storage and refactor
+    private val TAG = "SharedPrefConfigStorage"
     private val fretBoardSettings = "org.mozilla.fretboard.settings"
 
     private val CONFIG_JSON = "config-json"
     private val OVERRIDE_PREFIX = "experiment.override."
 
-    override fun getConfigJson(context: Context): String? {
-        val prefs: SharedPreferences = context.getApplicationContext().getSharedPreferences(fretBoardSettings, Context.MODE_PRIVATE)
-        return prefs.getString(CONFIG_JSON, null)
+
+    override fun getExperimentJson(config: FretboardConfiguration): String? {
+        val context = config.getContext()
+        if (context != null) {
+            val prefs: SharedPreferences = context.getApplicationContext().getSharedPreferences(
+                    fretBoardSettings, Context.MODE_PRIVATE)
+            return prefs.getString(CONFIG_JSON, null)
+        } else return null
     }
 
-    override fun setConfigJson(context: Context, configJson: String) {
-        val sharedPref = context.applicationContext.getSharedPreferences(
-                fretBoardSettings, Context.MODE_PRIVATE)
-        with(sharedPref.edit()) {
-            putString(CONFIG_JSON, configJson)
-            apply()
+    override fun setExperimentJson(config: FretboardConfiguration, configJson: String) {
+        val context = config.getContext()
+        if (context != null) {
+            val sharedPref = context.applicationContext.getSharedPreferences(
+                    fretBoardSettings, Context.MODE_PRIVATE)
+            with(sharedPref.edit()) {
+                putString(CONFIG_JSON, configJson)
+                apply()
+            }
         }
+        Log.d(TAG, "The context is null, so sharedpreference is not edited")
     }
 
 
-    override fun getOverrideValue(context: Context, experimentName: String): Boolean? {
-        val sharedPref = context.applicationContext.getSharedPreferences(
-                fretBoardSettings, Context.MODE_PRIVATE)
+    override fun getOverrideValue(config: FretboardConfiguration, experimentName: String): Boolean? {
+        val context = config.getContext()
+        if (context != null) {
+            val sharedPref = context.applicationContext.getSharedPreferences(
+                    fretBoardSettings, Context.MODE_PRIVATE)
 
-        val key = OVERRIDE_PREFIX + experimentName
-        return if (sharedPref.contains(key)) {
-            // This will never fall back to the default value.
-            sharedPref.getBoolean(key, false)
-        } else null
-
+            val key = OVERRIDE_PREFIX + experimentName
+            return if (sharedPref.contains(key)) {
+                // This will never fall back to the default value.
+                sharedPref.getBoolean(key, false)
+            } else null
+        } else return null
         // Default to returning null if no override was found.
     }
 
 
-    override fun setOverrideValue(context: Context, experimentName: String, isEnabled: Boolean) {
-        val sharedPref = context.applicationContext.getSharedPreferences(
-                fretBoardSettings, Context.MODE_PRIVATE)
+    override fun setOverrideValue(config: FretboardConfiguration, experimentName: String,
+                                  isEnabled: Boolean) {
+        val context = config.getContext()
+        if (context != null) {
+            val sharedPref = context.applicationContext.getSharedPreferences(
+                    fretBoardSettings, Context.MODE_PRIVATE)
 
-        with(sharedPref.edit()) {
-            putBoolean(OVERRIDE_PREFIX + experimentName, isEnabled)
-            apply()
+            with(sharedPref.edit()) {
+                putBoolean(OVERRIDE_PREFIX + experimentName, isEnabled)
+                apply()
+            }
         }
+        Log.d(TAG, "context is null, so setoverridvalue isn't edited")
     }
 
 
-    override fun clearOverrideValue(context: Context, experimentName: String) {
-        val sharedPref = context.applicationContext.getSharedPreferences(
-                fretBoardSettings, Context.MODE_PRIVATE)
-        with(sharedPref.edit()) {
-            remove(OVERRIDE_PREFIX + experimentName)
-            apply()
+    override fun clearOverrideValue(config: FretboardConfiguration, experimentName: String) {
+        val context = config.getContext()
+        if (context != null) {
+            val sharedPref = context.applicationContext.getSharedPreferences(
+                    fretBoardSettings, Context.MODE_PRIVATE)
+            with(sharedPref.edit()) {
+                remove(OVERRIDE_PREFIX + experimentName)
+                apply()
+            }
         }
+        Log.d(TAG, "Context is null, so override value didn't change")
     }
-
 }

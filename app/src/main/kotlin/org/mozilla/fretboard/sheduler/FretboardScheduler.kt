@@ -18,6 +18,7 @@ class JobSchedulerFretboardScheduler : FretboardScheduler {
         val jobService = ComponentName(configuration.getContext(), FretboardJobService::class.java)
 
         val jobInfo = JobInfo.Builder(JOB_ID, jobService)
+                .setPeriodic(900000)
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                 .setPersisted(true)
                 .setBackoffCriteria(configuration.getInitialBackoffForUpload(), JobInfo.BACKOFF_POLICY_EXPONENTIAL)
