@@ -10,41 +10,22 @@ class FretboardConfiguration {
     private val DEFAULT_PASSWORD = "my-secret"
     private val DEFAULT_USER_NAME = "token"
     private val DEFAULT_SERVER_ENDPOINT = "https://kinto.dev.mozaws.net"
+    private val DEFAULT_CONNECT_TIMEOUT = 10000
+    private val DEFAULT_READ_TIMEOUT = 30000
+    private val DEFAULT_TIME_STAMP = "0"
 
-    private var context: Context? = null
-    private val initialBackoffForUpload: Long = DEFAULT_INITAL_BACKOFF_FOR_UPLOAD
-    private val userAgent: String? = DEFAULT_USER_AGENT
-    private val name: String = DEFAULT_USER_NAME
-    private val password: String = DEFAULT_PASSWORD
-    private val serverEndpoint : String = DEFAULT_SERVER_ENDPOINT
 
-    fun getServerEndpoint() : String {
-        return serverEndpoint
-    }
+    var context: Context? = null
+    var serverEndpoint : String = DEFAULT_SERVER_ENDPOINT
+    var connectTimeout: Int = DEFAULT_CONNECT_TIMEOUT
+    var readTimeout: Int = DEFAULT_READ_TIMEOUT
+    var lastTimeStamp = DEFAULT_TIME_STAMP
 
-    fun getUserName(): String {
-        return name
-    }
 
-    fun getPassword(): String {
-        return password
-    }
-
-    fun getUserAgent(): String? {
-        return userAgent
-    }
-
-    fun getContext(): Context? {
-        return context
-    }
-
-    fun setContext(context: Context) {
-        this.context = context
-    }
-
-    fun getInitialBackoffForUpload(): Long {
-        return initialBackoffForUpload
-    }
+    val initialBackoffForUpload: Long = DEFAULT_INITAL_BACKOFF_FOR_UPLOAD
+    val userAgent: String? = DEFAULT_USER_AGENT
+    val name: String = DEFAULT_USER_NAME
+    val password: String = DEFAULT_PASSWORD
 
 
 }
