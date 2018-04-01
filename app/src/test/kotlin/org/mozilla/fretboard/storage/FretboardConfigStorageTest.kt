@@ -1,13 +1,12 @@
 package org.mozilla.fretboard.storage
 
-import junit.framework.Assert
+import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mozilla.fretboard.config.FretboardConfiguration
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 
-// TODO rewrite tests
+// TODO rewrite tests after refactoring
 @RunWith(RobolectricTestRunner::class)
 class FretboardConfigStorageTest {
     private val TAG = "FretboardConfigStorageTest"
@@ -16,36 +15,19 @@ class FretboardConfigStorageTest {
     @Test
     fun testOverMultipleSession() {
         val context = RuntimeEnvironment.application
-        val config = FretboardConfiguration()
-        config.context = context
-        val storage: ConfigStorage = SharedPreferenceConfigStorage()
+        val storage = SharedPreferenceFretboardExperimentsStorage(context)
 
         for (i in 1..10) {
-            storage.setExperimentJson(config, "Test : $i")
+            storage.setExperimentJson("Test : $i")
         }
 
-        println(storage.getExperimentJson(config))
-        Assert.assertEquals(storage.getExperimentJson(config), "Test : 10")
+        println(storage.getExperimentJson())
+        assertEquals(storage.getExperimentJson(), "Test : 10")
 
     }
 
     @Test
     fun testResettingExperimentManually() {
-        val context = RuntimeEnvironment.application
-        val config = FretboardConfiguration()
-        config.context = context
-        val storage: ConfigStorage = SharedPreferenceConfigStorage()
-
-        storage.clearOverrideValue(config, "Test")
-        storage.setOverrideValue(config, "Test", true)
-
-        // TODO refactor this ugly hack
-        Assert.assertEquals(storage.getOverrideValue(config, "Test"), true)
-        println(storage.getOverrideValue(config, "Test"))
-        storage.setOverrideValue(config, "Test", false)
-        Assert.assertEquals(storage.getOverrideValue(config, "Test"), false)
-        println(storage.getOverrideValue(config, "Test"))
-
     }
 }
 

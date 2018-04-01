@@ -6,9 +6,9 @@ import android.content.Context
 import android.os.AsyncTask
 import android.support.annotation.VisibleForTesting
 import android.util.Log
-import org.mozilla.fretboard.config.FretboardConfiguration
+import org.mozilla.fretboard.helpers.FretboardConfiguration
 import org.mozilla.fretboard.net.HttpURLConnectionFretboardClient
-import org.mozilla.fretboard.storage.SharedPreferenceConfigStorage
+import org.mozilla.fretboard.storage.SharedPreferenceFretboardExperimentsStorage
 
 
 class FretboardJobService : JobService {
@@ -41,22 +41,17 @@ class FretboardJobService : JobService {
     }
 
     private inner class LoadExperimentTask : AsyncTask<JobParameters, Void, Void>() {
-        val defaultPath: String = "/v1/buckets/default/collections/tasks/records"
-
-
          override fun doInBackground(vararg params: JobParameters): Void? {
             val parameters = params[0]
-            loadExperimentsInBackground(defaultPath, this, parameters)
+             loadExperimentsInBackground(this, parameters)
             return null
         }
     }
 
     @VisibleForTesting
-    fun loadExperimentsInBackground(defaultPath: String,
-                                    task: AsyncTask<*, *, *>, parameters: JobParameters) {
-        val config = FretboardConfiguration()
-        config.context = context
-        val storage = SharedPreferenceConfigStorage()
+    fun loadExperimentsInBackground(task: AsyncTask<*, *, *>, parameters: JobParameters) {
+        val config = FretboardConfiguration(context)
+        val storage = SharedPreferenceFretboardExperimentsStorage(config)
         val loader = HttpURLConnectionFretboardClient()
 
         Log.d(TAG, "Performing load of experiment")
@@ -64,13 +59,13 @@ class FretboardJobService : JobService {
             Log.d(TAG, "Job stopped. Exiting.")
             return  // Job will be rescheduled from onStopJob().
         }
-        val result : String? = loader.downloadExperiment(config, defaultPath)
+        val result: String? = loader.updateExperimentConfig(config)
         println("Result: $result")
         Log.d(TAG, "Result: $result")
-        storage.setExperimentJson(config, result!!)
+        storage.setExperimentJson(result!!)
 
         Log.d(TAG, "All loads performed")
-        val resultFromStorage = storage.getExperimentJson(config)
+        val resultFromStorage = storage.getExperimentJson()
         println("Hello: $resultFromStorage")
         //jobFinished(parameters, false)
     }

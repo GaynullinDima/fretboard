@@ -3,8 +3,8 @@ package org.mozilla.fretboard.net
 
 import android.util.Base64
 import android.util.Log
-import org.mozilla.fretboard.config.FretboardConfiguration
-import org.mozilla.fretboard.utils.readStream
+import org.mozilla.fretboard.helpers.FretboardConfiguration
+import org.mozilla.fretboard.helpers.readStream
 import java.io.BufferedInputStream
 import java.io.IOException
 
@@ -14,21 +14,20 @@ import java.net.URL
 
 
 interface FretboardClient {
-    fun downloadExperiment(config: FretboardConfiguration, path: String): String?
+    fun updateExperimentConfig(config: FretboardConfiguration): String?
 }
 
-
+// Hardcoded for Kinto HttpURLConnection client
 class HttpURLConnectionFretboardClient : FretboardClient {
     private val TAG = "HttpURLFretboardClient"
 
-    override fun downloadExperiment(config: FretboardConfiguration, path: String): String? {
+    override fun updateExperimentConfig(config: FretboardConfiguration): String? {
         var connection: HttpURLConnection? = null
-
 
         try {
             // Constructing connection with server
             val encodedUserPass = encodeUserPassForAuthorization(config.name, config.password)
-            connection = openConnectionConnection(config.serverEndpoint, path, config.lastTimeStamp)
+            connection = openKintoConnection(config.serverEndpoint, config.serverPath, config.lastTimeStamp)
             connection.connectTimeout = config.connectTimeout
             connection.readTimeout = config.readTimeout
             connection.requestMethod = "GET"
@@ -39,6 +38,7 @@ class HttpURLConnectionFretboardClient : FretboardClient {
 
             val (result, responseCode) = download(connection)
             Log.d(TAG, "Experiment download: $responseCode")
+            //
             when (responseCode) {
                 in 200..299 -> {
                     // Update last update time stamp
@@ -66,8 +66,7 @@ class HttpURLConnectionFretboardClient : FretboardClient {
     }
 
 
-    private fun openConnectionConnection(endpoint: String, path: String,
-                                         lastTimeStamp: String): HttpURLConnection {
+    private fun openKintoConnection(endpoint: String, path: String, lastTimeStamp: String): HttpURLConnection {
         val url = URL("$endpoint$path?_since=$lastTimeStamp")
         return url.openConnection() as HttpURLConnection
     }
